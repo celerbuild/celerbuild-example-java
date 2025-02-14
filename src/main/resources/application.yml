@@ -1,0 +1,11 @@
+# Main configuration file
+spring:
+  profiles:
+    active: dev  # Default to development environment
+
+# Common logging pattern configuration
+logging:
+  pattern:
+    # Format: timestamp [thread] log-level logger-name - message
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

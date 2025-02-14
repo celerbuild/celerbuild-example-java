@@ -1,0 +1,10 @@
+# Development environment configuration
+server:
+  port: 8083  # Server port for development
+
+logging:
+  level:
+    root: INFO      # Global log level
+    com.celerbuild: DEBUG  # Package specific log level, more detailed for development
+  file:
+    name: ./logs/application-dev.log  # Log file path for development environment

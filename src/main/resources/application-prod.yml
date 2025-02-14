@@ -1,0 +1,10 @@
+# Production environment configuration
+server:
+  port: 8083  # Server port for production
+
+logging:
+  level:
+    root: WARN      # Global log level, only show warnings and errors
+    com.celerbuild: INFO  # Package specific log level, less verbose for production
+  file:
+    name: ./logs/application-prod.log  # Log file path for production environment
