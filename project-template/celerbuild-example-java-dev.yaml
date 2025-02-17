@@ -1,0 +1,68 @@
+name: celerbuild-example-java-dev
+env: dev
+repoPath: git@github.com:celerbuild/celerbuild-example-java.git
+targetDeployPath: /home/ubuntu/apps/java
+targetDeployWarehousePath: /home/ubuntu/repos/java
+targetWarehouseVersionKeep: 3
+serverClusterID: 41
+deployMode: branch
+deployUser: ubuntu
+buildCmds: tar --no-xattrs --no-mac-metadata -zcvf ${LOCAL_PACKAGE_FILE} *
+preDeploymentCmds: ''
+postDeploymentCmds: |-
+  #!/bin/bash
+
+  # Define project directories
+  SOURCE_DIR="${TARGET_DEPLOYMENT_PATH}/${TARGET_DEPLOYMENT_PROJECT_NAME}"
+  DEST_DIR="/home/ubuntu/celerbuild-example-java"
+
+  # Check if the destination directory exists
+  if [ ! -d "$DEST_DIR" ]; then
+      sudo mkdir -p "$DEST_DIR"
+      echo "Directory $DEST_DIR created."
+  fi
+
+  # Stop existing application if running
+  if systemctl is-active --quiet celerbuild-example-java; then
+      sudo systemctl stop celerbuild-example-java
+      echo "Stopped existing application"
+  else
+      echo "No existing application running"
+  fi
+
+  # Clean up existing directory and copy new contents
+  sudo rm -rf "$DEST_DIR"/*
+  sudo cp -r "$SOURCE_DIR"/. "$DEST_DIR"
+
+  # Fix permissions for Maven build
+  sudo chown -R ubuntu:ubuntu "$DEST_DIR"
+
+  # Change to project directory
+  cd "$DEST_DIR"
+
+  # Clean Maven target directory with sudo
+  sudo rm -rf target/
+
+  # Skip tests during Maven build and package process
+  mvn clean package -DskipTests
+
+  # Check if build was successful
+  if [ $? -eq 0 ] && [ -f target/*.jar ]; then
+      # Copy JAR file to the correct location
+      sudo cp target/*.jar app.jar
+      
+      # Set environment profile (dev/prod based on deployment)
+      sudo sed -i 's/SPRING_PROFILES_ACTIVE=.*/SPRING_PROFILES_ACTIVE=dev/' /etc/systemd/system/celerbuild-example-java.service
+      
+      # Reload systemd configuration
+      sudo systemctl daemon-reload
+      
+      # Start application
+      sudo systemctl start celerbuild-example-java
+      echo "Application started with dev profile"
+  else
+      echo "Maven build failed or JAR file not found"
+      exit 1
+  fi
+numberOfLatestTags: 0
+specifyBranches: dev
