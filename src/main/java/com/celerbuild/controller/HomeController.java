@@ -8,7 +8,7 @@ import java.util.Map;
 @RestController
 public class HomeController {
 
-    private static final String VERSION = "1.0.0";
+    private static final String VERSION = "1.0.1";
 
     @GetMapping("/")
     public Map<String, String> home() {
