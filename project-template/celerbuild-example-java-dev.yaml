@@ -13,8 +13,9 @@ postDeploymentCmds: |-
   #!/bin/bash
 
   # Define project directories
+  DEPLOY_USER="${DEPLOY_USER}"  # Deployment user (e.g., ubuntu, ec2-user, etc.)
   SOURCE_DIR="${TARGET_DEPLOYMENT_PATH}/${TARGET_DEPLOYMENT_PROJECT_NAME}"
-  DEST_DIR="/home/ubuntu/celerbuild-example-java"
+  DEST_DIR="/home/${DEPLOY_USER}/celerbuild-example-java"
 
   # Check if the destination directory exists
   if [ ! -d "$DEST_DIR" ]; then
@@ -35,7 +36,7 @@ postDeploymentCmds: |-
   sudo cp -r "$SOURCE_DIR"/. "$DEST_DIR"
 
   # Fix permissions for Maven build
-  sudo chown -R ubuntu:ubuntu "$DEST_DIR"
+  sudo chown -R ${DEPLOY_USER}:${DEPLOY_USER} "$DEST_DIR"
 
   # Change to project directory
   cd "$DEST_DIR"
@@ -50,13 +51,13 @@ postDeploymentCmds: |-
   if [ $? -eq 0 ] && [ -f target/*.jar ]; then
       # Copy JAR file to the correct location
       sudo cp target/*.jar app.jar
-      
+  
       # Set environment profile (dev/prod based on deployment)
       sudo sed -i 's/SPRING_PROFILES_ACTIVE=.*/SPRING_PROFILES_ACTIVE=dev/' /etc/systemd/system/celerbuild-example-java.service
-      
+  
       # Reload systemd configuration
       sudo systemctl daemon-reload
-      
+  
       # Start application
       sudo systemctl start celerbuild-example-java
       echo "Application started with dev profile"
