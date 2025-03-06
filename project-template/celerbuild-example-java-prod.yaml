@@ -27,6 +27,8 @@ deployMode: tag
 # Specify the actual user account on the target deployment server
 deployUser: ubuntu
 
+# buildCmds: Commands executed during the build phase
+# These commands are executed on the build server to create deployment packages
 buildCmds: |-
   # Check the operating system type
   OS=$(uname)
@@ -46,7 +48,14 @@ buildCmds: |-
       # For Linux and other systems, use standard options
       tar --no-xattrs -zcvf ${LOCAL_PACKAGE_FILE} *
   fi
+
+# preDeploymentCmds: Commands executed before deployment
+# These commands run on target servers before the new version is deployed
 preDeploymentCmds: ''
+
+# postDeploymentCmds: Commands executed after deployment
+# These commands run on target servers after the new version is deployed
+# Typically used for service restart, permission updates, and deployment verification
 postDeploymentCmds: |-
   #!/bin/bash
 
