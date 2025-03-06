@@ -33,13 +33,6 @@ buildCmds: |-
   # Check the operating system type
   OS=$(uname)
 
-  # Build the application
-  echo "Building the application..."
-  make build
-
-  # Change to build directory
-  cd build
-
   # Create package based on OS type
   if [ "$OS" = "Darwin" ]; then
       # For macOS, include mac-specific options
