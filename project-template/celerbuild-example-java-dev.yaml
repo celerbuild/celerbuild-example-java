@@ -1,13 +1,51 @@
 name: celerbuild-example-java-dev
 env: dev
-repoPath: git@github.com:celerbuild/celerbuild-example-java.git
+# Repository URL supports two formats:
+# 1. HTTPS format (recommended for public repositories): https://github.com/celerbuild/celerbuild-example-java.git
+# 2. SSH format (requires SSH key configuration): git@github.com:celerbuild/celerbuild-example-java.git
+#    When using SSH format, you need to add the server's public key where Celerbuild is deployed to any GitHub account
+repoPath: https://github.com/celerbuild/celerbuild-example-java.git
+
+# Specify the server path for project deployment
 targetDeployPath: /home/ubuntu/apps/java
+
+# Specify the warehouse path on target server for storing deployment packages
 targetDeployWarehousePath: /home/ubuntu/repos/java
+
+# Number of versions to keep in the warehouse repository
 targetWarehouseVersionKeep: 3
+
+# serverClusterID: Please select an actual existing server cluster after importing the template
+# The ID will be different in your environment
 serverClusterID: 41
+
+# deployMode: Supports two modes
+# - branch: for development environment
+# - tag: for production environment
 deployMode: branch
+
+# Specify the actual user account on the target deployment server
 deployUser: ubuntu
-buildCmds: tar --no-xattrs --no-mac-metadata -zcvf ${LOCAL_PACKAGE_FILE} *
+
+buildCmds: |-
+  # Check the operating system type
+  OS=$(uname)
+
+  # Build the application
+  echo "Building the application..."
+  make build
+
+  # Change to build directory
+  cd build
+
+  # Create package based on OS type
+  if [ "$OS" = "Darwin" ]; then
+      # For macOS, include mac-specific options
+      tar --no-xattrs --no-mac-metadata -zcvf ${LOCAL_PACKAGE_FILE} *
+  else
+      # For Linux and other systems, use standard options
+      tar --no-xattrs -zcvf ${LOCAL_PACKAGE_FILE} *
+  fi
 preDeploymentCmds: ''
 postDeploymentCmds: |-
   #!/bin/bash
@@ -65,5 +103,6 @@ postDeploymentCmds: |-
       echo "Maven build failed or JAR file not found"
       exit 1
   fi
-numberOfLatestTags: 0
+# specifyBranches: Supports multiple branches separated by commas (e.g., "dev,test,staging")
+# Recommendation: Specify a limited number of branches for better performance
 specifyBranches: dev
